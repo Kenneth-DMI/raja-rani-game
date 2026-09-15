@@ -1,0 +1,33 @@
+// Raja Rani frontend - Netlify static + Render backend (Socket.IO)
+// + offline Practice vs Bots (same classic rules)
+
+const DEFAULT_SERVER = localStorage.getItem('rr_server') || 'http://localhost:3001';
+let socket = null, serverUrl = DEFAULT_SERVER;
+
+const FULL_COURT = [
+  { key:'raja', nameEn:'Raja', nameHi:'राजा', points:1000, emoji:'👑' },
+  { key:'rani', nameEn:'Rani', nameHi:'रानी', points:800, emoji:'👸' },
+  { key:'mantri', nameEn:'Mantri', nameHi:'मंत्री', points:700, emoji:'📜', guesser:true },
+  { key:'senapati', nameEn:'Senapati', nameHi:'सेनापति', points:600, emoji:'🛡️' },
+  { key:'sipahi', nameEn:'Sipahi', nameHi:'सिपाही', points:500, emoji:'💂' },
+  { key:'kotwal', nameEn:'Kotwal', nameHi:'कोतवाल', points:400, emoji:'🏰' },
+  { key:'praja', nameEn:'Praja', nameHi:'प्रजा', points:300, emoji:'🧑‍🌾' },
+  { key:'villager', nameEn:'Villager', nameHi:'ग्रामीण', points:200, emoji:'👳' },
+  { key:'sahayak', nameEn:'Sahayak', nameHi:'सहायक', points:100, emoji:'🙏' },
+  { key:'chor', nameEn:'Chor', nameHi:'चोर', points:0, emoji:'🥷', chor:true },
+];
+const SIPAHI_G = { key:'sipahi', nameEn:'Sipahi (Police)', nameHi:'सिपाही', points:500, emoji:'💂', guesser:true };
+
+function rolesFor(n){
+  n=Math.max(4,Math.min(10,n));
+  if(n===4) return [FULL_COURT[0],FULL_COURT[1],SIPAHI_G,FULL_COURT[9]];
+  return [...FULL_COURT.slice(0,n-1), FULL_COURT[9]];
+}
+
+const $ = id => document.getElementById(id);
+const S = { name:'', room:'', snap:null, myId:null, myRole:null, rajaId:null, guesserId:null, guesserKey:null, rajaCalled:false, bot:false, botState:null, timerInt:null, deadline:0 };
+
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); window.scrollTo(0,0); }
+function err(id,msg){ $(id).textContent = msg||''; }
+function log(boxId, html){ const b=$(boxId); const d=document.createElement('div'); d.innerHTML=html; b.appendChild(d); b.scrollTop=b.scrollHeight; }
+function esc(s){ return (s||'').replace(/[&<>']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;'}[c])); } // v1.0.1
