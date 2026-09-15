@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,11 +12,11 @@
 <div class="bg-pattern"></div>
 
 <header class="topbar">
-  <div class="brand">👑 <span>Raja Rani</span> <small>राजा-रानी • school wala game</small></div>
+  <div class="brand">👑 <span>Raja Rani</span> <small>Traditional Indian school game</small></div>
   <div class="top-actions">
     <span id="connDot" class="conn-dot offline" title="server connection">●</span>
     <button id="btnServer" class="ghost-btn">🔌 Server</button>
-    <button id="btnHow" class="ghost-btn">❓ Kaise khele?</button>
+    <button id="btnHow" class="ghost-btn">❓ How to play?</button>
   </div>
 </header>
 
@@ -26,8 +26,8 @@
   <section id="screen-home" class="screen active">
     <div class="hero">
       <div class="hero-crown">👑👸📜💂🥷</div>
-      <h1>Raja Rani <span class="hindi">राजा-रानी</span></h1>
-      <p class="tagline">Wahi classic school game — <b>chit wali parchiyan</b>, <b>“Mera Mantri Kaun?”</b>, aur chor-pakad! Ab <b>4–10 dost</b>, alag-alag jagah se, ek room code se.</p>
+      <h1>Raja Rani</h1>
+      <p class="tagline">The classic school game — secret role slips, <b>"Who is my Minister?"</b>, and catching the thief! Now <b>4–10 friends</b> can play together from different places with one room code.</p>
       <div class="pills">
         <span>🏫 School classic</span><span>🌍 Online rooms</span><span>👥 4–10 players</span><span>📱 Mobile ready</span>
       </div>
@@ -35,12 +35,12 @@
 
     <div class="grid2">
       <div class="card">
-        <h2>🎮 Khelo</h2>
-        <label>Apna naam
+        <h2>🎮 Play</h2>
+        <label>Your name
           <input id="inName" maxlength="20" placeholder="e.g. Aarav" autocomplete="nickname" />
         </label>
         <div class="tabs">
-          <button class="tab active" data-tab="create">✨ Naya Room</button>
+          <button class="tab active" data-tab="create">✨ New Room</button>
           <button class="tab" data-tab="join">🔑 Join Room</button>
           <button class="tab" data-tab="bot">🤖 Practice (bots)</button>
         </div>
@@ -50,34 +50,34 @@
             <label>Players (4–10)<input id="inMax" type="number" min="4" max="10" value="6" /></label>
             <label>Rounds (1–10)<input id="inRounds" type="number" min="1" max="10" value="5" /></label>
           </div>
-          <button id="btnCreate" class="big-btn">✨ Room Banao</button>
-          <p class="hint">Host banoge. Code doston ko WhatsApp karo.</p>
+          <button id="btnCreate" class="big-btn">✨ Create Room</button>
+          <p class="hint">You will be the host. Share the code with friends on WhatsApp.</p>
         </div>
 
         <div id="tab-join" class="tabpanel hidden">
           <label>Room code<input id="inCode" maxlength="5" placeholder="e.g. KQ7XP" style="text-transform:uppercase" /></label>
-          <button id="btnJoin" class="big-btn secondary">🚪 Room me Ghuso</button>
-          <p class="hint">Link se aaye ho? Code auto-bhar jayega (?room=CODE).</p>
+          <button id="btnJoin" class="big-btn secondary">🚪 Join Room</button>
+          <p class="hint">Came from a link? The code fills in automatically (?room=CODE).</p>
         </div>
 
         <div id="tab-bot" class="tabpanel hidden">
-          <p>Server nahi hai? Akele practice karo — 3 bots ke saath wahi asli rules.</p>
-          <button id="btnBot" class="big-btn bot">🤖 Bots se Khelo (offline)</button>
+          <p>No server? Practice alone — the same real rules with 3 bots.</p>
+          <button id="btnBot" class="big-btn bot">🤖 Play vs Bots (offline)</button>
         </div>
         <p id="homeErr" class="err"></p>
       </div>
 
       <div class="card rules-mini">
-        <h2>📜 Asli Niyam (classic)</h2>
+        <h2>📜 Real Rules (classic)</h2>
         <ol>
-          <li>📝 <b>Chits</b> banti hain: Raja 1000, Rani 800, Mantri 700… Chor 0. Sabko ek secret chit.</li>
-          <li>👑 <b>Raja</b> khud ko reveal karta hai aur pukarta hai — <i>“Mera Mantri Kaun?”</i></li>
-          <li>📜 <b>Mantri</b> (4 players me <b>Sipahi/Police</b>) saamne aata hai, chor ko guess karta hai.</li>
-          <li>✅ Sahi pakda → Mantri apne points rakhta, Chor 0. ❌ Galat → Mantri 0, <b>Chor Mantri ke points le jata!</b></li>
-          <li>👑 Rani, Senapati, Sipahi… sab fixed points. 5–10 rounds ke baad <b>sabse zyada total = Raja of Rajas! 🏆</b></li>
+          <li>📝 <b>Slips</b> are made: Raja 1000, Rani 800, Mantri 700… Chor 0. Everyone gets one secret slip.</li>
+          <li>👑 The <b>Raja</b> reveals himself and calls out — <i>"Who is my Minister?"</i></li>
+          <li>📜 The <b>Mantri</b> (<b>Sipahi/Police</b> with 4 players) steps forward and guesses the thief.</li>
+          <li>✅ Correct guess → the Mantri keeps his points, the Chor gets 0. ❌ Wrong guess → the Mantri gets 0, and the <b>Chor steals the Mantri's points!</b></li>
+          <li>👑 Rani, Senapati, Sipahi… all keep fixed points. After 5–10 rounds, the <b>highest total wins — Raja of Rajas! 🏆</b></li>
         </ol>
         <details>
-          <summary>👥 4–10 players ke roles (points)</summary>
+          <summary>👥 Roles for 4–10 players (points)</summary>
           <div id="rolesPreview" class="roles-table"></div>
         </details>
       </div>
@@ -89,7 +89,7 @@
     <div class="card">
       <div class="lobby-head">
         <div>
-          <div class="muted">ROOM CODE — doston ko bhejo</div>
+          <div class="muted">ROOM CODE — send it to friends</div>
           <div class="roomcode"><span id="lobbyCode">-----</span>
             <button id="btnCopy" class="ghost-btn small">📋 Copy</button>
             <button id="btnShare" class="ghost-btn small">🔗 Link</button>
@@ -103,17 +103,17 @@
           <h3>👥 Players (<span id="lobbyCount">0</span>)</h3>
           <ul id="lobbyPlayers" class="plist"></ul>
           <div id="hostControls">
-            <button id="btnStart" class="big-btn">🚀 Game Shuru Karo (min 4)</button>
-            <p class="hint">Sirf host start kar sakta hai.</p>
+            <button id="btnStart" class="big-btn">🚀 Start Game (min 4)</button>
+            <p class="hint">Only the host can start.</p>
           </div>
           <p id="lobbyErr" class="err"></p>
         </div>
         <div>
-          <h3>🃏 Is room me chits</h3>
+          <h3>🃏 Slips in this room</h3>
           <div id="lobbyRoles" class="roles-table"></div>
           <h3>💬 Chat</h3>
           <div id="chatBox" class="chat"></div>
-          <div class="chat-row"><input id="chatIn" maxlength="120" placeholder="All the best likho…" /><button id="chatSend">➤</button></div>
+          <div class="chat-row"><input id="chatIn" maxlength="120" placeholder="Type 'all the best'…" /><button id="chatSend">➤</button></div>
         </div>
       </div>
     </div>
@@ -122,29 +122,29 @@
   <!-- ============ GAME ============ -->
   <section id="screen-game" class="screen">
     <div class="roundbar card">
-      <div><b id="roundLabel">Round 1/5</b><div class="muted" id="phaseLabel">Raja ka intezaar…</div></div>
+      <div><b id="roundLabel">Round 1/5</b><div class="muted" id="phaseLabel">Waiting for the Raja…</div></div>
       <div class="timer hidden" id="guessTimer">⏳ 60</div>
       <button id="btnLeave2" class="ghost-btn small">🚪</button>
     </div>
 
     <div class="grid2">
       <div class="card chit-card">
-        <h3>🎴 Tumhari Chit (secret!)</h3>
+        <h3>🎴 Your Slip (secret!)</h3>
         <div id="myChit" class="chit closed"><div class="chit-inner">?</div></div>
         <div id="myRoleLine" class="role-line"></div>
         <div id="rajaAction" class="hidden">
-          <p>👑 Tum <b>Raja</b> ho! Darbar lagao:</p>
-          <button id="btnRajaCall" class="big-btn">📢 “Mera Mantri Kaun?”</button>
+          <p>👑 You are the <b>Raja</b>! Open the court:</p>
+          <button id="btnRajaCall" class="big-btn">📢 "Who is my Minister?"</button>
         </div>
         <div id="guessAction" class="hidden">
-          <p>🔍 Tum <b id="guesserTitle">Mantri</b> ho! Chor ko pakdo — kisi ek ko chuno (60 sec):</p>
+          <p>🔍 You are the <b id="guesserTitle">Mantri</b>! Catch the thief — pick one suspect (60 sec):</p>
           <div id="suspectBtns" class="suspects"></div>
         </div>
         <div id="waitLine" class="muted"></div>
       </div>
 
       <div class="card">
-        <h3>🏰 Darbar (players)</h3>
+        <h3>🏰 Court (players)</h3>
         <div id="tablePlayers" class="table"></div>
         <h3>🏆 Scoreboard (total)</h3>
         <ol id="scoreBoard" class="scores"></ol>
@@ -152,7 +152,7 @@
     </div>
 
     <div class="card">
-      <h3>📣 Darbar ki khabar + 💬</h3>
+      <h3>📣 Court news + 💬</h3>
       <div id="logBox" class="chat"></div>
       <div class="chat-row"><input id="logIn" maxlength="120" placeholder="…"/><button id="logSend">➤</button></div>
     </div>
@@ -160,15 +160,15 @@
     <!-- result -->
     <div id="resultModal" class="modal hidden">
       <div class="modal-card">
-        <h2 id="resTitle">✅ Chor Pakda Gaya!</h2>
+        <h2 id="resTitle">✅ Thief Caught!</h2>
         <p id="resSub" class="muted"></p>
         <div id="resGrid" class="reveal-grid"></div>
         <ol id="resScores" class="scores"></ol>
         <div class="row2">
-          <button id="btnNext" class="big-btn">➡️ Agla Round</button>
+          <button id="btnNext" class="big-btn">➡️ Next Round</button>
           <button id="btnToLobby" class="ghost-btn">Lobby</button>
         </div>
-        <p class="hint" id="nextHint">Sirf host next round karega.</p>
+        <p class="hint" id="nextHint">Only the host advances rounds.</p>
       </div>
     </div>
 
@@ -179,7 +179,7 @@
         <h2 id="winTitle">🏆 Winner!</h2>
         <ol id="finalScores" class="scores"></ol>
         <div class="row2">
-          <button id="btnAgain" class="big-btn">🔁 Phir Khelo</button>
+          <button id="btnAgain" class="big-btn">🔁 Play Again</button>
           <button id="btnHome" class="ghost-btn">🏠 Home</button>
         </div>
       </div>
@@ -191,30 +191,30 @@
 <div id="serverModal" class="modal hidden">
   <div class="modal-card">
     <h2>🔌 Game Server (Render)</h2>
-    <p class="muted">Frontend Netlify par hai, realtime server Render par. Apna Render URL yahan paste karo — sab players <b>same URL</b> use karein.</p>
+    <p class="muted">The frontend runs on Netlify, the realtime server on Render. Paste your Render URL here — all players must use the <b>same URL</b>.</p>
     <label>Backend URL<input id="inServer" placeholder="https://raja-rani-server.onrender.com" /></label>
     <div class="row2">
       <button id="btnSaveServer" class="big-btn">💾 Save + Connect</button>
       <button id="btnCloseServer" class="ghost-btn">Close</button>
     </div>
-    <p class="hint">Render free plan pehla connect 30–60 sec le sakta hai (cold start). <a href="https://render.com" target="_blank">render.com</a></p>
+    <p class="hint">On the Render free plan the first connect can take 30–60 sec (cold start). <a href="https://render.com" target="_blank">render.com</a></p>
   </div>
 </div>
 
 <!-- how modal -->
 <div id="howModal" class="modal hidden">
   <div class="modal-card">
-    <h2>❓ Kaise khele? (school style)</h2>
+    <h2>❓ How to play? (school style)</h2>
     <ol>
-      <li>Host <b>Create</b> kare (players 4–10, rounds 5). Code share kare.</li>
-      <li>Sab <b>Join</b> karein. Min 4 hone par Host <b>Start</b>.</li>
-      <li>Har round me secret chit: <b>Raja 1000, Rani 800, Mantri 700, Senapati 600, Sipahi 500, Kotwal 400, Praja 300, Villager 200, Sahayak 100, Chor 0</b> (jitne players, utni top chits + Chor).</li>
-      <li>4 players me guesser = <b>Sipahi (Police) 500</b>. 5+ me guesser = <b>Mantri 700</b>.</li>
-      <li>👑 Raja button dabata hai <i>“Mera Mantri Kaun?”</i> → Mantri reveal → suspect chunno.</li>
-      <li>Sahi = Mantri safe, Chor 0. Galat = Mantri 0, Chor ko Mantri wale points!</li>
-      <li>Fixed roles hamesha apne points rakhte. End me highest total jeetta 🏆</li>
+      <li>The host presses <b>Create</b> (4–10 players, 5 rounds) and shares the code.</li>
+      <li>Everyone <b>joins</b>. Once there are at least 4, the host presses <b>Start</b>.</li>
+      <li>Each round deals secret slips: <b>Raja 1000, Rani 800, Mantri 700, Senapati 600, Sipahi 500, Kotwal 400, Praja 300, Villager 200, Sahayak 100, Chor 0</b> (top slips for the player count + Chor).</li>
+      <li>With 4 players the guesser is the <b>Sipahi (Police) 500</b>. With 5+ it is the <b>Mantri 700</b>.</li>
+      <li>👑 The Raja presses <i>"Who is my Minister?"</i> → the Mantri steps forward → pick a suspect.</li>
+      <li>Correct = the Mantri is safe, the Chor gets 0. Wrong = the Mantri gets 0, and the Chor steals the Mantri's points!</li>
+      <li>Fixed roles always keep their points. The highest total at the end wins 🏆</li>
     </ol>
-    <button id="btnCloseHow" class="big-btn">Samajh gaya! 👍</button>
+    <button id="btnCloseHow" class="big-btn">Got it! 👍</button>
   </div>
 </div>
 
