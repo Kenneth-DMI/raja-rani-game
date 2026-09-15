@@ -1,0 +1,18 @@
+{
+  "name": "raja-rani-server",
+  "version": "1.0.0",
+  "description": "Traditional Indian Raja Rani multiplayer game server (Socket.IO) - deploy on Render",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
