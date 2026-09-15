@@ -30,7 +30,7 @@ const S = { name:'', room:'', snap:null, myId:null, myRole:null, rajaId:null, gu
 function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); window.scrollTo(0,0); }
 function err(id,msg){ $(id).textContent = msg||''; }
 function log(boxId, html){ const b=$(boxId); const d=document.createElement('div'); d.innerHTML=html; b.appendChild(d); b.scrollTop=b.scrollHeight; }
-function esc(s){ return (s||'').replace(/[&<>']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function esc(s){ return (s||'').replace(/[&<>']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;'}[c])); } // v1.0.1
 
 // ---------- server connect ----------
 function connect(url){
