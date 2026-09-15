@@ -19,23 +19,23 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3001;
 
 // ---------- Classic roles ladder (traditional + extended for 4-10) ----------
-// 10-player full court (points descending, like school score sheet):
-// Raja 1000 > Rani 800 > Mantri 700 > Senapati 600 > Sipahi 500 >
-// Kotwal 400 > Praja 300 > Villager 200 > Sahayak 100 > Chor 0
+// 10-player full court (points descending, like a school score sheet):
+// Raja 1000 > Rani 800 > Minister 700 > Commander 600 > Soldier 500 >
+// Guard 400 > Citizen 300 > Villager 200 > Helper 100 > Thief 0
 const FULL_COURT = [
-  { key: 'raja',     nameEn: 'Raja',     nameHi: 'राजा',     points: 1000, emoji: '👑', fixed: true,  desc: 'King - reveals first, always 1000' },
-  { key: 'rani',     nameEn: 'Rani',     nameHi: 'रानी',     points: 800,  emoji: '👸', fixed: true,  desc: 'Queen - fixed 800' },
-  { key: 'mantri',   nameEn: 'Mantri',   nameHi: 'मंत्री',   points: 700,  emoji: '📜', guesser: true, desc: 'Minister - must find the Chor' },
-  { key: 'senapati', nameEn: 'Senapati', nameHi: 'सेनापति', points: 600,  emoji: '🛡️', fixed: true,  desc: 'Commander - fixed 600' },
-  { key: 'sipahi',   nameEn: 'Sipahi',   nameHi: 'सिपाही',   points: 500,  emoji: '💂', fixed: true,  desc: 'Soldier / Police - fixed 500' },
-  { key: 'kotwal',   nameEn: 'Kotwal',   nameHi: 'कोतवाल',   points: 400,  emoji: '🏰', fixed: true,  desc: 'Guard - fixed 400' },
-  { key: 'praja',    nameEn: 'Praja',    nameHi: 'प्रजा',    points: 300,  emoji: '🧑‍🌾', fixed: true,  desc: 'Villager - fixed 300' },
-  { key: 'villager', nameEn: 'Villager', nameHi: 'ग्रामीण',  points: 200,  emoji: '👳', fixed: true,  desc: 'Villager - fixed 200' },
-  { key: 'sahayak',  nameEn: 'Sahayak',  nameHi: 'सहायक',    points: 100,  emoji: '🙏', fixed: true,  desc: 'Helper - fixed 100' },
-  { key: 'chor',     nameEn: 'Chor',     nameHi: 'चोर',      points: 0,    emoji: '🥷', chor: true,   desc: 'Thief - 0 if caught, steals guesser points if hidden' },
+  { key: 'raja',     nameEn: 'Raja',     points: 1000, emoji: '👑', fixed: true,  desc: 'King - reveals first, always 1000' },
+  { key: 'rani',     nameEn: 'Rani',     points: 800,  emoji: '👸', fixed: true,  desc: 'Queen - fixed 800' },
+  { key: 'minister', nameEn: 'Minister', points: 700,  emoji: '📜', guesser: true, desc: 'Minister - must find the Thief' },
+  { key: 'commander', nameEn: 'Commander', points: 600,  emoji: '🛡️', fixed: true,  desc: 'Commander - fixed 600' },
+  { key: 'soldier',  nameEn: 'Soldier',  points: 500,  emoji: '💂', fixed: true,  desc: 'Soldier - fixed 500' },
+  { key: 'guard',    nameEn: 'Guard',    points: 400,  emoji: '🏰', fixed: true,  desc: 'Guard - fixed 400' },
+  { key: 'citizen',  nameEn: 'Citizen',  points: 300,  emoji: '🧑‍🌾', fixed: true,  desc: 'Citizen - fixed 300' },
+  { key: 'villager', nameEn: 'Villager', points: 200,  emoji: '👳', fixed: true,  desc: 'Villager - fixed 200' },
+  { key: 'helper',   nameEn: 'Helper',   points: 100,  emoji: '🙏', fixed: true,  desc: 'Helper - fixed 100' },
+  { key: 'thief',    nameEn: 'Thief',    points: 0,    emoji: '🥷', thief: true,   desc: 'Thief - 0 if caught, steals guesser points if hidden' },
 ];
 
-const SIPAHI_GUESSER_4P = { key: 'sipahi', nameEn: 'Sipahi (Police)', nameHi: 'सिपाही', points: 500, emoji: '💂', guesser: true, desc: 'Police - must find the Chor (4-player classic)' };
+const POLICE_GUESSER_4P = { key: 'police', nameEn: 'Police', points: 500, emoji: '🚓', guesser: true, desc: 'Police - must find the Thief (4-player classic)' };
 
 function getRolesForCount(n) {
   n = Math.max(4, Math.min(10, n));
@@ -43,11 +43,11 @@ function getRolesForCount(n) {
     return [
       FULL_COURT[0], // Raja 1000
       FULL_COURT[1], // Rani 800
-      SIPAHI_GUESSER_4P, // Sipahi 500 guesser
-      FULL_COURT[9], // Chor 0
+      POLICE_GUESSER_4P, // Police 500 guesser
+      FULL_COURT[9], // Thief 0
     ];
   }
-  // 5-10: first (n-1) from top + Chor
+  // 5-10: first (n-1) from top + Thief
   const top = FULL_COURT.slice(0, n - 1);
   return [...top, FULL_COURT[9]];
 }
@@ -124,7 +124,7 @@ function startRound(room) {
       guesserKey,
       players: publicPlayers(room),
       rolesInPlay: roles,
-      message: `Round ${room.round.number}: Raja ${room.players.find(x => x.id === rajaId).name} mil gaye!`,
+      message: `Round ${room.round.number}: Raja is ${room.players.find(x => x.id === rajaId).name}!`,
     });
   });
 
@@ -148,8 +148,8 @@ function scoreRound(room) {
   const { assignments, guesserId, guesserKey, guessedId } = room.round;
   const roles = room.roles;
   const guesserRole = roleByKey(roles, guesserKey);
-  const chorId = room.players.find(p => assignments[p.id] === 'chor').id;
-  const correct = guessedId === chorId;
+  const thiefId = room.players.find(p => assignments[p.id] === 'thief').id;
+  const correct = guessedId === thiefId;
   room.round.correct = correct;
 
   const roundPoints = {};
@@ -158,7 +158,7 @@ function scoreRound(room) {
     const role = roleByKey(roles, rk);
     let pts = role.points;
     if (rk === guesserKey) pts = correct ? guesserRole.points : 0;
-    if (rk === 'chor') pts = correct ? 0 : guesserRole.points;
+    if (rk === 'thief') pts = correct ? 0 : guesserRole.points;
     roundPoints[p.id] = pts;
     p.score += pts;
   });
@@ -168,7 +168,7 @@ function scoreRound(room) {
     round: room.round.number,
     correct,
     guessedId,
-    chorId,
+    thiefId,
     guesserId,
     rajaId: room.round.rajaId,
     reveal: room.players.map(p => ({
@@ -202,8 +202,8 @@ io.on('connection', (socket) => {
   // CREATE
   socket.on('createRoom', ({ playerName, maxPlayers = 6, totalRounds = 5 }, cb) => {
     try {
-      name = (playerName || '').trim().slice(0, 20);
-      if (!name) return cb && cb({ error: 'Naam likho (enter your name)' });
+      const name = (playerName || '').trim().slice(0, 20);
+      if (!name) return cb && cb({ error: 'Please enter your name' });
       maxPlayers = Math.max(4, Math.min(10, parseInt(maxPlayers) || 6));
       totalRounds = Math.max(1, Math.min(10, parseInt(totalRounds) || 5));
       const code = genCode();
@@ -218,7 +218,7 @@ io.on('connection', (socket) => {
       socket.data.roomCode = code;
       cb && cb({ ok: true, roomCode: code, snapshot: roomSnapshot(room) });
       io.to(code).emit('roomUpdate', roomSnapshot(room));
-    } catch (e) { cb && cb({ error: 'Room banane me error' }); }
+    } catch (e) { cb && cb({ error: 'Error creating room' }); }
   });
 
   // JOIN
@@ -226,36 +226,33 @@ io.on('connection', (socket) => {
     try {
       roomCode = (roomCode || '').trim().toUpperCase();
       const name = (playerName || '').trim().slice(0, 20);
-      if (!roomCode || !rooms.has(roomCode)) return cb && cb({ error: 'Room code galat hai' });
-      if (!name) return cb && cb({ error: 'Naam likho' });
+      if (!roomCode || !rooms.has(roomCode)) return cb && cb({ error: 'Invalid room code' });
+      if (!name) return cb && cb({ error: 'Please enter your name' });
       const room = rooms.get(roomCode);
       // rejoin by name?
       let existing = room.players.find(p => p.name.toLowerCase() === name.toLowerCase() && !p.connected);
       if (existing) {
         existing.id = socket.id; existing.socketId = socket.id; existing.connected = true;
-        if (room.hostId && !room.players.find(p => p.id === room.hostId && p.connected)) {
-          // keep host if disconnected? transfer if host gone
-        }
       } else {
-        if (room.status !== 'lobby') return cb && cb({ error: 'Game already shuru ho gaya' });
-        if (room.players.length >= room.maxPlayers) return cb && cb({ error: 'Room full hai (max ' + room.maxPlayers + ')' });
-        if (room.players.some(p => p.name.toLowerCase() === name.toLowerCase())) return cb && cb({ error: 'Ye naam already liya gaya' });
+        if (room.status !== 'lobby') return cb && cb({ error: 'The game has already started' });
+        if (room.players.length >= room.maxPlayers) return cb && cb({ error: 'Room is full (max ' + room.maxPlayers + ')' });
+        if (room.players.some(p => p.name.toLowerCase() === name.toLowerCase())) return cb && cb({ error: 'This name is already taken' });
         room.players.push({ id: socket.id, name, socketId: socket.id, score: 0, connected: true });
       }
       socket.join(roomCode);
       socket.data.roomCode = roomCode;
       cb && cb({ ok: true, roomCode, snapshot: roomSnapshot(room) });
       io.to(roomCode).emit('roomUpdate', roomSnapshot(room));
-      io.to(roomCode).emit('chat', { sys: true, text: `${name} jud gaya 🎉` });
-    } catch (e) { cb && cb({ error: 'Join me error' }); }
+      io.to(roomCode).emit('chat', { sys: true, text: `${name} joined 🎉` });
+    } catch (e) { cb && cb({ error: 'Error joining room' }); }
   });
 
   // START (host)
   socket.on('startGame', (_, cb) => {
     const room = rooms.get(socket.data.roomCode);
-    if (!room) return cb && cb({ error: 'Room nahi mila' });
-    if (socket.id !== room.hostId) return cb && cb({ error: 'Sirf host start kar sakta hai' });
-    if (room.players.length < 4) return cb && cb({ error: 'Kam se kam 4 players chahiye (abhi ' + room.players.length + ')' });
+    if (!room) return cb && cb({ error: 'Room not found' });
+    if (socket.id !== room.hostId) return cb && cb({ error: 'Only the host can start the game' });
+    if (room.players.length < 4) return cb && cb({ error: 'Need at least 4 players (currently ' + room.players.length + ')' });
     room.players.forEach(p => p.score = 0);
     room.currentRound = 0;
     room.status = 'playing';
@@ -264,11 +261,11 @@ io.on('connection', (socket) => {
     cb && cb({ ok: true });
   });
 
-  // RAJA CALLS GUESSER: "Mera Mantri Kaun?"
+  // RAJA CALLS GUESSER: "Who is my Minister?"
   socket.on('rajaCall', (_, cb) => {
     const room = rooms.get(socket.data.roomCode);
-    if (!room || !room.round) return cb && cb({ error: 'Round nahi chal raha' });
-    if (socket.id !== room.round.rajaId) return cb && cb({ error: 'Sirf Raja bula sakta hai' });
+    if (!room || !room.round) return cb && cb({ error: 'No round in progress' });
+    if (socket.id !== room.round.rajaId) return cb && cb({ error: 'Only the Raja can call' });
     if (room.round.rajaCalled) return cb && cb({ ok: true });
     room.round.rajaCalled = true;
     const guesser = room.players.find(p => p.id === room.round.guesserId);
@@ -295,25 +292,25 @@ io.on('connection', (socket) => {
   // GUESS
   socket.on('makeGuess', ({ suspectId }, cb) => {
     const room = rooms.get(socket.data.roomCode);
-    if (!room || !room.round) return cb && cb({ error: 'Round nahi chal raha' });
-    if (socket.id !== room.round.guesserId) return cb && cb({ error: 'Sirf Mantri/Sipahi guess karega' });
-    if (!room.round.rajaCalled) return cb && cb({ error: 'Pehle Raja ko pukarne do' });
-    if (room.round.guessedId) return cb && cb({ error: 'Guess ho chuka' });
-    if (!room.players.some(p => p.id === suspectId)) return cb && cb({ error: 'Galat player' });
+    if (!room || !room.round) return cb && cb({ error: 'No round in progress' });
+    if (socket.id !== room.round.guesserId) return cb && cb({ error: 'Only the Minister/Police can guess' });
+    if (!room.round.rajaCalled) return cb && cb({ error: 'Wait for the Raja to call first' });
+    if (room.round.guessedId) return cb && cb({ error: 'Guess already made' });
+    if (!room.players.some(p => p.id === suspectId)) return cb && cb({ error: 'Invalid player' });
     if (suspectId === room.round.rajaId || suspectId === room.round.guesserId)
-      return cb && cb({ error: 'Raja ya khud ko guess nahi kar sakte' });
+      return cb && cb({ error: 'You cannot guess the Raja or yourself' });
     room.round.guessedId = suspectId;
     clearTimeout(room.guessTimer);
     scoreRound(room);
     cb && cb({ ok: true });
   });
 
-  // NEXT ROUND (host, or anyone after reveal? keep host)
+  // NEXT ROUND (host only)
   socket.on('nextRound', (_, cb) => {
     const room = rooms.get(socket.data.roomCode);
-    if (!room) return cb && cb({ error: 'Room nahi mila' });
-    if (socket.id !== room.hostId) return cb && cb({ error: 'Sirf host next round karega' });
-    if (room.status !== 'revealing') return cb && cb({ error: 'Abhi result nahi aaya' });
+    if (!room) return cb && cb({ error: 'Room not found' });
+    if (socket.id !== room.hostId) return cb && cb({ error: 'Only the host can start the next round' });
+    if (room.status !== 'revealing') return cb && cb({ error: 'Result not ready yet' });
     if (room.round.number >= room.totalRounds) {
       room.status = 'finished';
       const board = [...room.players].sort((a, b) => b.score - a.score);
@@ -331,8 +328,8 @@ io.on('connection', (socket) => {
   // RESTART (host)
   socket.on('restartGame', (_, cb) => {
     const room = rooms.get(socket.data.roomCode);
-    if (!room) return cb && cb({ error: 'Room nahi mila' });
-    if (socket.id !== room.hostId) return cb && cb({ error: 'Sirf host' });
+    if (!room) return cb && cb({ error: 'Room not found' });
+    if (socket.id !== room.hostId) return cb && cb({ error: 'Only the host can do this' });
     room.players.forEach(p => p.score = 0);
     room.currentRound = 0; room.round = null; room.status = 'lobby';
     io.to(room.code).emit('backToLobby', roomSnapshot(room));
@@ -358,7 +355,6 @@ io.on('connection', (socket) => {
     socket.leave(code);
     if (room.players.length === 0) { clearTimeout(room.guessTimer); rooms.delete(code); return; }
     if (room.hostId === socket.id) room.hostId = room.players[0].id;
-    // if game in progress with <4, end? just update
     io.to(code).emit('roomUpdate', roomSnapshot(room));
     socket.data.roomCode = null;
   });
