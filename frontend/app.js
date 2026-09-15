@@ -1,7 +1,7 @@
 // Raja Rani frontend - Netlify static + Render backend (Socket.IO)
 // + offline Practice vs Bots (same classic rules)
 
-const DEFAULT_SERVER = localStorage.getItem('rr_server') || 'http://localhost:3001';
+const DEFAULT_SERVER = localStorage.getItem('rr_server') || 'https://raja-rani-server-8kjo.onrender.com';
 let socket = null, serverUrl = DEFAULT_SERVER;
 
 const FULL_COURT = [
