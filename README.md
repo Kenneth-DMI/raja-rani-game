@@ -1,4 +1,4 @@
-# 👑 Raja Rani — Traditional Indian School Game (Online, 4–10 players)
+# 👑 Raja Rani — Traditional Indian School Game (Online, 4–24 players)
 
 The classic **Raja-Rani room game** — friends in different places can now play together with a room code.
 
@@ -6,7 +6,7 @@ The classic **Raja-Rani room game** — friends in different places can now play
 - **Backend (Render):** `backend/` — Node.js + Express + Socket.IO. Rooms, secret slips, scoring, timer.
 - **Offline:** `🤖 Practice (bots)` runs without a server — same rules with 3 bots.
 
-## 🎴 Rules (school classic + 4–10 extension)
+## 🎴 Rules (school classic + 4–24 extension)
 
 | Players | Slips in play |
 |---|---|
@@ -17,6 +17,14 @@ The classic **Raja-Rani room game** — friends in different places can now play
 | 8 | + Citizen 300 |
 | 9 | + Villager 200 |
 | 10 | Raja 1000, Rani 800, Minister 700, Commander 600, Soldier 500, Guard 400, Citizen 300, Villager 200, Helper 100, Thief 0 |
+| 11–24 | All 10 classic slips above, plus in points order: Crown Prince 900, Treasurer 850, Noble 750, Advisor 650, Captain 550, Archer 450, Merchant 350, Blacksmith 325, Messenger 250, Drummer 225, Farmer 150, Cook 125, Servant 50, Wanderer 25 (top slips for the player count + Thief) |
+
+## 🎲 Fair rotation (no more repeat slips!)
+
+Each game tracks every slip you have held:
+- Every **non-royal** role appears **at most once per player** per game.
+- **Raja, Rani, Minister** may repeat but **max 3 times each** per player.
+- Tip: set **Rounds = Players** for a full rotation where everyone tries every role once.
 
 How each round works:
 1. Everyone gets a secret slip. The 👑 **Raja** reveals himself and calls *"Who is my Minister?"* (or *"Police, catch the thief!"* with 4 players).
