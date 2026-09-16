@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Raja Rani 👑 | Traditional Indian School Game - Online Multiplayer (4-10)</title>
-<meta name="description" content="Classic Indian school Raja Rani room game online. 4-10 players, different places, room code. Netlify + Render." />
+<title>Raja Rani 👑 | Traditional Indian School Game - Online Multiplayer (4-24)</title>
+<meta name="description" content="Classic Indian school Raja Rani room game online. 4-24 players, different places, room code. Netlify + Render." />
 <link rel="stylesheet" href="styles.css" />
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 </head>
@@ -27,9 +27,9 @@
     <div class="hero">
       <div class="hero-crown">👑👸📜💂🥷</div>
       <h1>Raja Rani</h1>
-      <p class="tagline">The classic school game — secret role slips, <b>"Who is my Minister?"</b>, and catching the thief! Now <b>4–10 friends</b> can play together from different places with one room code.</p>
+      <p class="tagline">The classic school game — secret role slips, <b>"Who is my Minister?"</b>, and catching the thief! Now <b>4–24 friends</b> can play together from different places with one room code.</p>
       <div class="pills">
-        <span>🏫 School classic</span><span>🌍 Online rooms</span><span>👥 4–10 players</span><span>📱 Mobile ready</span>
+        <span>🏫 School classic</span><span>🌍 Online rooms</span><span>👥 4–24 players</span><span>📱 Mobile ready</span><span>🎲 Fair rotation</span>
       </div>
     </div>
 
@@ -47,11 +47,11 @@
 
         <div id="tab-create" class="tabpanel">
           <div class="row2">
-            <label>Players (4–10)<input id="inMax" type="number" min="4" max="10" value="6" /></label>
-            <label>Rounds (1–10)<input id="inRounds" type="number" min="1" max="10" value="5" /></label>
+            <label>Players (4–24)<input id="inMax" type="number" min="4" max="24" value="6" /></label>
+            <label>Rounds (1–24)<input id="inRounds" type="number" min="1" max="24" value="5" /></label>
           </div>
           <button id="btnCreate" class="big-btn">✨ Create Room</button>
-          <p class="hint">You will be the host. Share the code with friends on WhatsApp.</p>
+          <p class="hint">You will be the host. Share the code with friends on WhatsApp. Tip: set Rounds = Players for a full fair rotation.</p>
         </div>
 
         <div id="tab-join" class="tabpanel hidden">
@@ -74,10 +74,11 @@
           <li>👑 The <b>Raja</b> reveals himself and calls out — <i>"Who is my Minister?"</i></li>
           <li>📜 The <b>Minister</b> (<b>Police</b> with 4 players) steps forward and guesses the thief.</li>
           <li>✅ Correct guess → the Minister keeps his points, the Thief gets 0. ❌ Wrong guess → the Minister gets 0, and the <b>Thief steals the Minister's points!</b></li>
-          <li>👑 Rani, Commander, Soldier… all keep fixed points. After 5–10 rounds, the <b>highest total wins — Raja of Rajas! 🏆</b></li>
+          <li>👑 Rani, Commander, Soldier… all keep fixed points. After all rounds, the <b>highest total wins — Raja of Rajas! 🏆</b></li>
+          <li>🎲 <b>Fair rotation:</b> you never get the same slip twice in a game — except Raja, Rani and Minister (max 3 times each). Set Rounds = Players to try every role!</li>
         </ol>
         <details>
-          <summary>👥 Roles for 4–10 players (points)</summary>
+          <summary>👥 Roles for 4–24 players (points)</summary>
           <div id="rolesPreview" class="roles-table"></div>
         </details>
       </div>
@@ -206,13 +207,14 @@
   <div class="modal-card">
     <h2>❓ How to play? (school style)</h2>
     <ol>
-      <li>The host presses <b>Create</b> (4–10 players, 5 rounds) and shares the code.</li>
+      <li>The host presses <b>Create</b> (4–24 players, up to 24 rounds) and shares the code.</li>
       <li>Everyone <b>joins</b>. Once there are at least 4, the host presses <b>Start</b>.</li>
       <li>Each round deals secret slips: <b>Raja 1000, Rani 800, Minister 700, Commander 600, Soldier 500, Guard 400, Citizen 300, Villager 200, Helper 100, Thief 0</b> (top slips for the player count + Thief).</li>
       <li>With 4 players the guesser is the <b>Police 500</b>. With 5+ it is the <b>Minister 700</b>.</li>
       <li>👑 The Raja presses <i>"Who is my Minister?"</i> → the Minister steps forward → pick a suspect.</li>
       <li>Correct = the Minister is safe, the Thief gets 0. Wrong = the Minister gets 0, and the Thief steals the Minister's points!</li>
       <li>Fixed roles always keep their points. The highest total at the end wins 🏆</li>
+      <li>🎲 Fair rotation keeps it fresh: no repeat slips (Raja/Rani/Minister max 3× each).</li>
     </ol>
     <button id="btnCloseHow" class="big-btn">Got it! 👍</button>
   </div>
