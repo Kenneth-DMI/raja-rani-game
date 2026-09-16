@@ -4,7 +4,9 @@
 const DEFAULT_SERVER = localStorage.getItem('rr_server') || 'https://raja-rani-server-8kjo.onrender.com';
 let socket = null, serverUrl = DEFAULT_SERVER;
 
-const FULL_COURT = [
+// Classic 9 non-thief roles (unchanged order) + extended court for 11-24 players.
+// Fair rotation: non-royal roles max once per player per game; Raja/Rani/Minister max 3x.
+const CLASSIC_ORDER = [
   { key:'raja', nameEn:'Raja', points:1000, emoji:'👑' },
   { key:'rani', nameEn:'Rani', points:800, emoji:'👸' },
   { key:'minister', nameEn:'Minister', points:700, emoji:'📜', guesser:true },
@@ -14,14 +16,33 @@ const FULL_COURT = [
   { key:'citizen', nameEn:'Citizen', points:300, emoji:'🧑‍🌾' },
   { key:'villager', nameEn:'Villager', points:200, emoji:'👳' },
   { key:'helper', nameEn:'Helper', points:100, emoji:'🙏' },
-  { key:'thief', nameEn:'Thief', points:0, emoji:'🥷', thief:true },
 ];
+const EXTENDED_ROLES = [
+  { key:'crownprince', nameEn:'Crown Prince', points:900, emoji:'🤴' },
+  { key:'treasurer', nameEn:'Treasurer', points:850, emoji:'💎' },
+  { key:'noble', nameEn:'Noble', points:750, emoji:'🎩' },
+  { key:'advisor', nameEn:'Advisor', points:650, emoji:'🧙' },
+  { key:'captain', nameEn:'Captain', points:550, emoji:'⚔️' },
+  { key:'archer', nameEn:'Archer', points:450, emoji:'🏹' },
+  { key:'merchant', nameEn:'Merchant', points:350, emoji:'💰' },
+  { key:'blacksmith', nameEn:'Blacksmith', points:325, emoji:'🔨' },
+  { key:'messenger', nameEn:'Messenger', points:250, emoji:'✉️' },
+  { key:'drummer', nameEn:'Drummer', points:225, emoji:'🥁' },
+  { key:'farmer', nameEn:'Farmer', points:150, emoji:'🌾' },
+  { key:'cook', nameEn:'Cook', points:125, emoji:'🍳' },
+  { key:'servant', nameEn:'Servant', points:50, emoji:'🧹' },
+  { key:'wanderer', nameEn:'Wanderer', points:25, emoji:'🎒' },
+];
+const THIEF_ROLE = { key:'thief', nameEn:'Thief', points:0, emoji:'🥷', thief:true };
 const POLICE_G = { key:'police', nameEn:'Police', points:500, emoji:'🚓', guesser:true };
+const MAX_PLAYERS = 24;
+const FULL_COURT = [...CLASSIC_ORDER, ...EXTENDED_ROLES, THIEF_ROLE];
 
 function rolesFor(n){
-  n=Math.max(4,Math.min(10,n));
-  if(n===4) return [FULL_COURT[0],FULL_COURT[1],POLICE_G,FULL_COURT[9]];
-  return [...FULL_COURT.slice(0,n-1), FULL_COURT[9]];
+  n=Math.max(4,Math.min(MAX_PLAYERS,n));
+  if(n===4) return [CLASSIC_ORDER[0],CLASSIC_ORDER[1],POLICE_G,THIEF_ROLE];
+  if(n<=10) return [...CLASSIC_ORDER.slice(0,n-1), THIEF_ROLE];
+  return [...CLASSIC_ORDER, ...EXTENDED_ROLES.slice(0,n-10), THIEF_ROLE];
 }
 
 const $ = id => document.getElementById(id);
@@ -63,7 +84,7 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   $('tab-'+t.dataset.tab).classList.remove('hidden');
 });
 function renderRolesPreview(){
-  const n = Math.max(4,Math.min(10,parseInt($('inMax').value)||6));
+  const n = Math.max(4,Math.min(MAX_PLAYERS,parseInt($('inMax').value)||6));
   $('rolesPreview').innerHTML = rolesFor(n).map(r=>`<div class="role-row ${r.guesser?'guesser':''}"><span>${r.emoji} ${r.nameEn}${r.guesser?' 🔍':''}</span><b>${r.points}</b></div>`).join('');
 }
 $('inMax').oninput = renderRolesPreview; renderRolesPreview();
@@ -125,6 +146,10 @@ function onRoundStarted(d){
   $('myChit').className='chit revealed';
   $('myChit').innerHTML=`<div class="chit-info"><div class="emoji">${d.yourRole.emoji}</div><h2>${d.yourRole.nameEn}</h2><div><b>${d.yourRole.points} pts</b></div>${d.yourRole.guesser?'<div>🔍 You must catch the THIEF!</div>':''}${d.yourRole.key==='raja'?'<div>👑 You are the Raja — press the button!</div>':''}${d.yourRole.key==='thief'?'<div>🥷 Shhh… stay hidden!</div>':''}</div>`;
   $('myRoleLine').innerHTML = d.yourRole.key==='thief' ? `You are the <b>Thief</b> — fool the Minister 😎` : `You are the <b>${d.yourRole.nameEn}</b> (${d.yourRole.points} pts)`;
+  const fair = d.fairness || { timesHad: 1, isNewRole: true, unseenLeft: 0 };
+  $('myRoleLine').innerHTML += fair.isNewRole
+    ? `<br>✨ <b>New role!</b>${fair.unseenLeft>0 ? ` ${fair.unseenLeft} more to try.` : ''}`
+    : `<br>🔁 Seen ${fair.timesHad}× this game (fair rotation).`;
   const amRaja = S.myId===d.rajaId;
   $('btnRajaCall').textContent = d.guesserKey==='police' ? '📢 "Police, catch the thief!"' : '📢 "Who is my Minister?"';
   $('rajaAction').classList.toggle('hidden',!amRaja);
@@ -204,7 +229,7 @@ function hideModals(){ ['resultModal','finalModal'].forEach(id=>$(id).classList.
 const BOT_NAMES=['Chintu','Pintu','Meena'];
 $('btnBot').onclick=()=>{
   const name=$('inName').value.trim()||'You';
-  S.name=name; S.bot=true; S.botState={ round:0, total:5, scores:{}, names:[name,...BOT_NAMES] };
+  S.name=name; S.bot=true; S.botState={ round:0, total:5, scores:{}, names:[name,...BOT_NAMES], hist:{} };
   S.botState.names.forEach(n=>S.botState.scores[n]=0);
   show('screen-game'); hideModals(); $('logBox').innerHTML='';
   botRound();
@@ -212,8 +237,25 @@ $('btnBot').onclick=()=>{
 function botRound(){
   const st=S.botState; st.round++;
   const roles=rolesFor(4);
-  const order=[...st.names].sort(()=>Math.random()-.5);
-  st.assign={}; order.forEach((n,i)=>st.assign[n]=roles[i].key);
+  // fair rotation (same rule as online): non-royals max once, Raja/Rani max 3x
+  const cap=k=>(k==='raja'||k==='rani')?3:1;
+  let best=null,bestViol=Infinity;
+  for(let t=0;t<60;t++){
+    const rem=roles.slice().sort(()=>Math.random()-.5);
+    const order=st.names.slice().sort(()=>Math.random()-.5);
+    const a={}; let viol=0;
+    for(const nm of order){
+      const seen=st.hist[nm]||{};
+      let pool=rem.filter(r=>(seen[r.key]||0)<cap(r.key));
+      if(!pool.length){ pool=rem.slice(); viol++; }
+      const chosen=pool[Math.floor(Math.random()*pool.length)];
+      a[nm]=chosen.key; rem.splice(rem.indexOf(chosen),1);
+    }
+    if(viol===0){ best=a; break; }
+    if(viol<bestViol){ best=a; bestViol=viol; }
+  }
+  st.assign=best;
+  for(const nm of st.names){ st.hist[nm]=st.hist[nm]||{}; st.hist[nm][best[nm]]=(st.hist[nm][best[nm]]||0)+1; }
   st.roles=roles;
   st.raja=st.names.find(n=>st.assign[n]==='raja');
   st.guesser=st.names.find(n=>st.assign[n]==='police');
@@ -225,6 +267,8 @@ function botRound(){
   $('myChit').className='chit revealed';
   $('myChit').innerHTML=`<div class="chit-info"><div class="emoji">${myRole.emoji}</div><h2>${myRole.nameEn}</h2><div>${myRole.points} pts</div></div>`;
   $('myRoleLine').innerHTML=`You are the <b>${myRole.nameEn}</b>`;
+  const botHad=(st.hist[S.name]||{})[st.assign[S.name]]||1;
+  $('myRoleLine').innerHTML+= botHad<=1 ? `<br>✨ <b>New role!</b>` : `<br>🔁 Seen ${botHad}× this game (fair rotation).`;
   // fake snapshot for table
   S.snap={players:st.names.map(n=>({id:n,name:n,score:st.scores[n]}))};
   S.rajaId=st.raja; S.guesserId=null; S.rajaCalled=false; S.guesserKey='police'; S.myId=S.name;
@@ -285,7 +329,7 @@ function botNext(){
 
 function wireOnlineButtons(){
   $('btnNext').textContent='➡️ Next Round';
-  $('btnAgain').onclick=()=>{ if(S.bot){ $('finalModal').classList.add('hidden'); S.botState={round:0,total:5,scores:{},names:S.botState.names}; S.botState.names.forEach(n=>S.botState.scores[n]=0); botRound(); } else socket.emit('restartGame',{},()=>{}); };
+  $('btnAgain').onclick=()=>{ if(S.bot){ $('finalModal').classList.add('hidden'); S.botState={round:0,total:5,scores:{},names:S.botState.names,hist:{}}; S.botState.names.forEach(n=>S.botState.scores[n]=0); botRound(); } else socket.emit('restartGame',{},()=>{}); };
   $('btnHome').onclick=()=>{ if(S.bot){ location.reload(); } else leaveAll(); };
 }
 
