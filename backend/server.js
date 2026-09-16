@@ -18,11 +18,12 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3001;
 
-// ---------- Classic roles ladder (traditional + extended for 4-10) ----------
-// 10-player full court (points descending, like a school score sheet):
-// Raja 1000 > Rani 800 > Minister 700 > Commander 600 > Soldier 500 >
-// Guard 400 > Citizen 300 > Villager 200 > Helper 100 > Thief 0
-const FULL_COURT = [
+// ---------- Roles: classic 10-player ladder + extended court for 11-24 ----------
+// Classic anchors (unchanged): Raja 1000, Rani 800, Minister 700, Commander 600,
+// Soldier 500, Guard 400, Citizen 300, Villager 200, Helper 100, Thief 0.
+// 11+ player games keep all 9 classic non-thief roles, then add extended court
+// roles in points order, then the Thief.
+const CLASSIC_ORDER = [
   { key: 'raja',     nameEn: 'Raja',     points: 1000, emoji: '👑', fixed: true,  desc: 'King - reveals first, always 1000' },
   { key: 'rani',     nameEn: 'Rani',     points: 800,  emoji: '👸', fixed: true,  desc: 'Queen - fixed 800' },
   { key: 'minister', nameEn: 'Minister', points: 700,  emoji: '📜', guesser: true, desc: 'Minister - must find the Thief' },
@@ -32,28 +33,100 @@ const FULL_COURT = [
   { key: 'citizen',  nameEn: 'Citizen',  points: 300,  emoji: '🧑‍🌾', fixed: true,  desc: 'Citizen - fixed 300' },
   { key: 'villager', nameEn: 'Villager', points: 200,  emoji: '👳', fixed: true,  desc: 'Villager - fixed 200' },
   { key: 'helper',   nameEn: 'Helper',   points: 100,  emoji: '🙏', fixed: true,  desc: 'Helper - fixed 100' },
-  { key: 'thief',    nameEn: 'Thief',    points: 0,    emoji: '🥷', thief: true,   desc: 'Thief - 0 if caught, steals guesser points if hidden' },
 ];
+
+const EXTENDED_ROLES = [
+  { key: 'crownprince', nameEn: 'Crown Prince', points: 900, emoji: '🤴', fixed: true, desc: 'Crown Prince - fixed 900' },
+  { key: 'treasurer',   nameEn: 'Treasurer',    points: 850, emoji: '💎', fixed: true, desc: 'Treasurer - fixed 850' },
+  { key: 'noble',       nameEn: 'Noble',        points: 750, emoji: '🎩', fixed: true, desc: 'Noble - fixed 750' },
+  { key: 'advisor',     nameEn: 'Advisor',      points: 650, emoji: '🧙', fixed: true, desc: 'Advisor - fixed 650' },
+  { key: 'captain',     nameEn: 'Captain',      points: 550, emoji: '⚔️', fixed: true, desc: 'Captain - fixed 550' },
+  { key: 'archer',      nameEn: 'Archer',       points: 450, emoji: '🏹', fixed: true, desc: 'Archer - fixed 450' },
+  { key: 'merchant',    nameEn: 'Merchant',     points: 350, emoji: '💰', fixed: true, desc: 'Merchant - fixed 350' },
+  { key: 'blacksmith',  nameEn: 'Blacksmith',   points: 325, emoji: '🔨', fixed: true, desc: 'Blacksmith - fixed 325' },
+  { key: 'messenger',   nameEn: 'Messenger',    points: 250, emoji: '✉️', fixed: true, desc: 'Messenger - fixed 250' },
+  { key: 'drummer',     nameEn: 'Drummer',      points: 225, emoji: '🥁', fixed: true, desc: 'Drummer - fixed 225' },
+  { key: 'farmer',      nameEn: 'Farmer',       points: 150, emoji: '🌾', fixed: true, desc: 'Farmer - fixed 150' },
+  { key: 'cook',        nameEn: 'Cook',         points: 125, emoji: '🍳', fixed: true, desc: 'Cook - fixed 125' },
+  { key: 'servant',     nameEn: 'Servant',      points: 50,  emoji: '🧹', fixed: true, desc: 'Servant - fixed 50' },
+  { key: 'wanderer',    nameEn: 'Wanderer',     points: 25,  emoji: '🎒', fixed: true, desc: 'Wanderer - fixed 25' },
+];
+
+const THIEF_ROLE = { key: 'thief', nameEn: 'Thief', points: 0, emoji: '🥷', thief: true, desc: 'Thief - 0 if caught, steals guesser points if hidden' };
 
 const POLICE_GUESSER_4P = { key: 'police', nameEn: 'Police', points: 500, emoji: '🚓', guesser: true, desc: 'Police - must find the Thief (4-player classic)' };
 
+// Fair rotation: royal roles may repeat (max 3x per player per game),
+// every other role at most once per player per game.
+const ROYAL_KEYS = new Set(['raja', 'rani', 'minister']);
+const ROYAL_CAP = 3;
+const OTHER_CAP = 1;
+const MAX_PLAYERS = 24;
+
 function getRolesForCount(n) {
-  n = Math.max(4, Math.min(10, n));
+  n = Math.max(4, Math.min(MAX_PLAYERS, n));
   if (n === 4) {
     return [
-      FULL_COURT[0], // Raja 1000
-      FULL_COURT[1], // Rani 800
+      CLASSIC_ORDER[0], // Raja 1000
+      CLASSIC_ORDER[1], // Rani 800
       POLICE_GUESSER_4P, // Police 500 guesser
-      FULL_COURT[9], // Thief 0
+      THIEF_ROLE, // Thief 0
     ];
   }
-  // 5-10: first (n-1) from top + Thief
-  const top = FULL_COURT.slice(0, n - 1);
-  return [...top, FULL_COURT[9]];
+  if (n <= 10) {
+    // classic ladder: first (n-1) classics + Thief (unchanged behavior)
+    return [...CLASSIC_ORDER.slice(0, n - 1), THIEF_ROLE];
+  }
+  // 11-24: all 9 classics + extended roles in points order + Thief
+  return [...CLASSIC_ORDER, ...EXTENDED_ROLES.slice(0, n - 10), THIEF_ROLE];
 }
 
 function roleByKey(roles, key) {
   return roles.find(r => r.key === key);
+}
+
+// ---------- Fair rotation ----------
+// Each game tracks how often every player (by name) has held each role.
+// Non-royal roles: max once per player per game. Royals (raja/rani/minister):
+// max 3 times. Assignment retries random deals and keeps the one with the
+// fewest repeat violations (pure random fallback when a perfect deal is
+// impossible, e.g. more rounds than distinct roles).
+function histKey(p) { return (p.name || '').toLowerCase(); }
+function roleCap(key) { return ROYAL_KEYS.has(key) ? ROYAL_CAP : OTHER_CAP; }
+
+function dealRolesFair(room, roles) {
+  const hist = room.fair || {};
+  let best = null, bestViol = Infinity;
+  for (let attempt = 0; attempt < 60; attempt++) {
+    const remaining = shuffle(roles.slice());
+    const order = shuffle(room.players.slice());
+    const assign = {};
+    let viol = 0;
+    for (const p of order) {
+      const seen = hist[histKey(p)] || {};
+      let pool = remaining.filter(r => (seen[r.key] || 0) < roleCap(r.key));
+      if (pool.length === 0) { pool = remaining.slice(); viol++; }
+      const chosen = pool[Math.floor(Math.random() * pool.length)];
+      assign[p.id] = chosen.key;
+      remaining.splice(remaining.indexOf(chosen), 1);
+    }
+    if (viol === 0) { best = assign; bestViol = 0; break; }
+    if (viol < bestViol) { best = assign; bestViol = viol; }
+  }
+  for (const p of room.players) {
+    const k = histKey(p);
+    hist[k] = hist[k] || {};
+    hist[k][best[p.id]] = (hist[k][best[p.id]] || 0) + 1;
+  }
+  room.fair = hist;
+  return best;
+}
+
+function fairnessFor(room, player, roleKey) {
+  const seen = (room.fair[histKey(player)] || {});
+  const timesHad = seen[roleKey] || 0;
+  const unseenLeft = room.roles.filter(r => !(seen[r.key] > 0)).length;
+  return { timesHad, isNewRole: timesHad <= 1, unseenLeft };
 }
 
 // ---------- Rooms (in-memory) ----------
@@ -86,9 +159,7 @@ function startRound(room) {
   const n = room.players.length;
   const roles = getRolesForCount(n);
   room.roles = roles;
-  const keys = shuffle(roles.map(r => r.key));
-  const assignments = {};
-  room.players.forEach((p, i) => { assignments[p.id] = keys[i]; });
+  const assignments = dealRolesFair(room, roles);
 
   const guesserKey = roles.find(r => r.guesser).key;
   const rajaId = room.players.find(p => assignments[p.id] === 'raja').id;
@@ -119,6 +190,7 @@ function startRound(room) {
       totalRounds: room.totalRounds,
       yourRole: myRole,
       yourRoleKey: myRole.key,
+      fairness: fairnessFor(room, p, myRole.key),
       rajaId,
       rajaName: room.players.find(x => x.id === rajaId).name,
       guesserKey,
@@ -193,7 +265,7 @@ function scoreRound(room) {
 app.get('/', (req, res) => res.json({ ok: true, game: 'raja-rani', rooms: rooms.size }));
 app.get('/health', (req, res) => res.json({ ok: true }));
 app.get('/api/roles/:n', (req, res) => {
-  const n = Math.max(4, Math.min(10, parseInt(req.params.n) || 4));
+  const n = Math.max(4, Math.min(MAX_PLAYERS, parseInt(req.params.n) || 4));
   res.json({ count: n, roles: getRolesForCount(n) });
 });
 
@@ -204,14 +276,14 @@ io.on('connection', (socket) => {
     try {
       const name = (playerName || '').trim().slice(0, 20);
       if (!name) return cb && cb({ error: 'Please enter your name' });
-      maxPlayers = Math.max(4, Math.min(10, parseInt(maxPlayers) || 6));
-      totalRounds = Math.max(1, Math.min(10, parseInt(totalRounds) || 5));
+      maxPlayers = Math.max(4, Math.min(MAX_PLAYERS, parseInt(maxPlayers) || 6));
+      totalRounds = Math.max(1, Math.min(MAX_PLAYERS, parseInt(totalRounds) || 5));
       const code = genCode();
       const player = { id: socket.id, name, socketId: socket.id, score: 0, connected: true };
       const room = {
         code, hostId: socket.id, maxPlayers, totalRounds,
         players: [player], status: 'lobby', currentRound: 0, round: null, roles: [],
-        guessTimer: null,
+        guessTimer: null, fair: {},
       };
       rooms.set(code, room);
       socket.join(code);
@@ -255,6 +327,7 @@ io.on('connection', (socket) => {
     if (room.players.length < 4) return cb && cb({ error: 'Need at least 4 players (currently ' + room.players.length + ')' });
     room.players.forEach(p => p.score = 0);
     room.currentRound = 0;
+    room.fair = {};
     room.status = 'playing';
     io.to(room.code).emit('gameStarted', { totalRounds: room.totalRounds });
     startRound(room);
@@ -331,7 +404,7 @@ io.on('connection', (socket) => {
     if (!room) return cb && cb({ error: 'Room not found' });
     if (socket.id !== room.hostId) return cb && cb({ error: 'Only the host can do this' });
     room.players.forEach(p => p.score = 0);
-    room.currentRound = 0; room.round = null; room.status = 'lobby';
+    room.currentRound = 0; room.round = null; room.status = 'lobby'; room.fair = {};
     io.to(room.code).emit('backToLobby', roomSnapshot(room));
     io.to(room.code).emit('roomUpdate', roomSnapshot(room));
     cb && cb({ ok: true });
